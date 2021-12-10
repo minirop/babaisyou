@@ -14,7 +14,7 @@ uint8_t underlevel[MAP_FULL_SIZE];
 uint8_t level[MAP_FULL_SIZE] = {};
 uint8_t current_level = 0;
 
-uint8_t rules[W_YOU + 1];
+uint8_t rules[TILE_COUNT];
 void updateRules();
 bool isSubject(uint8_t tile);
 bool isStatus(uint8_t tile);
@@ -30,6 +30,9 @@ bool isPush(uint8_t tile);
 bool isStop(uint8_t tile);
 bool isYou(uint8_t tile);
 bool isWin(uint8_t tile);
+bool isSink(uint8_t tile);
+bool isKill(uint8_t tile);
+bool isWord(uint8_t tile);
 void moveImpl(uint8_t i, int8_t delta, uint8_t min, uint8_t max);
 void convertTile(uint8_t from, uint8_t to);
 
@@ -61,7 +64,7 @@ void updateGame()
   }
   else if (gb.buttons.pressed(BUTTON_B))
   {
-    startGame(current_level);
+    startLevel(current_level);
     return;
   }
   else
@@ -82,8 +85,18 @@ void updateGame()
       }
       else
       {
-        startGame(current_level);
+        startLevel(current_level);
       }
+    }
+    else if (isSink(underlevel[i]) && !isWord(level[i]))
+    {
+      level[i] = EMPTY;
+      underlevel[i] = EMPTY;
+    }
+    else if (isKill(underlevel[i]))
+    {
+      level[i] = underlevel[i];
+      underlevel[i] = EMPTY;
     }
   }
 }
@@ -104,6 +117,12 @@ void initRules()
   rules[WALL]   = 0;
   rules[W_STOP] = IS_PUSH;
   rules[W_YOU]  = IS_PUSH;
+  rules[W_GOOP] = IS_PUSH;
+  rules[GOOP]   = 0;
+  rules[W_SINK] = IS_PUSH;
+  rules[W_LAVA] = IS_PUSH;
+  rules[LAVA]   = 0;
+  rules[W_KILL] = IS_PUSH;
 
   for (uint8_t i = 0; i < MAP_FULL_SIZE; i++)
   {
@@ -117,6 +136,8 @@ void updateRules()
   rules[FLAG] = 0;
   rules[ROCK] = 0;
   rules[WALL] = 0;
+  rules[GOOP] = 0;
+  rules[LAVA] = 0;
 
   for (int i = 0; i < MAP_FULL_SIZE; i++)
   {
@@ -170,6 +191,8 @@ bool isSubject(uint8_t tile)
     case W_FLAG:
     case W_ROCK:
     case W_WALL:
+    case W_GOOP:
+    case W_LAVA:
       return true;
   }
   return false;
@@ -183,6 +206,8 @@ bool isStatus(uint8_t tile)
     case W_STOP:
     case W_WIN:
     case W_YOU:
+    case W_SINK:
+    case W_KILL:
       return true;
   }
   return false;
@@ -196,6 +221,8 @@ uint8_t getStatus(uint8_t tile)
     case W_STOP: return IS_STOP;
     case W_WIN:  return IS_WIN;
     case W_YOU:  return IS_YOU;
+    case W_SINK: return IS_SINK;
+    case W_KILL: return IS_KILL;
   }
 
   return 0;
@@ -209,6 +236,8 @@ uint8_t getSubject(uint8_t tile)
     case W_WALL: return WALL;
     case W_ROCK: return ROCK;
     case W_FLAG: return FLAG;
+    case W_GOOP: return GOOP;
+    case W_LAVA: return LAVA;
   }
 
   return 0;
@@ -313,9 +342,24 @@ bool isWin(uint8_t tile)
   return (rules[tile] & IS_WIN);
 }
 
+bool isSink(uint8_t tile)
+{
+  return (rules[tile] & IS_SINK);
+}
+
+bool isKill(uint8_t tile)
+{
+  return (rules[tile] & IS_KILL);
+}
+
+bool isWord(uint8_t tile)
+{
+  return isSubject(tile) || isStatus(tile) || tile == W_IS;
+}
+
 #define SLICE_HEIGHT 12
 
-void startGame(uint8_t id)
+void startLevel(uint8_t id)
 {
   current_level = id;
   initLevel(id);
@@ -337,7 +381,7 @@ void gameTick()
       const uint16_t * sprBegin = &tileset[ level[sliceIndex * map_width + s] * TILE_SIZE * TILE_SIZE ];
       for (int y = 0; y < TILE_SIZE; y++)
       {
-        memcpy(&buffer[SCREEN_WIDTH * y + s * TILE_SIZE], sprBegin + y * TILE_SIZE, TILE_SIZE*2);
+        memcpy(&buffer[SCREEN_WIDTH * y + s * TILE_SIZE + 2], sprBegin + y * TILE_SIZE, TILE_SIZE*2);
       }
     }
     

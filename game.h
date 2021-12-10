@@ -2,5 +2,6 @@
 
 #include <cstdint>
 
-void startGame(uint8_t id);
+void startLevel(uint8_t id);
 void gameTick();
+void restartLevel();

@@ -10,6 +10,8 @@ void setup()
   gb.begin();
   gb.display.init(0, 0, ColorMode::rgb565);
   SerialUSB.begin(9600);
+
+  menuInit();
 }
 
 void loop()
