@@ -28,6 +28,9 @@ $tiles = [
 	'Q' => 'W_KILL',
 	'A' => 'W_LAVA',
 	'L' => 'LAVA',
+	'E' => 'W_LOVE',
+	'H' => 'LOVE',
+	'M' => 'W_SWAP',
 ];
 
 foreach ($argv as $filename)
