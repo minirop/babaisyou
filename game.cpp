@@ -2,6 +2,7 @@
 #include "defines.h"
 #include "tileset.h"
 #include "draw.h"
+#include "title.h"
 
 constexpr uint8_t slices = 10;
 constexpr uint8_t map_width = 13;
@@ -67,6 +68,11 @@ void updateGame()
     startLevel(current_level);
     return;
   }
+  else if (gb.buttons.pressed(BUTTON_MENU))
+  {
+    gotoScreen(LEVEL_SELECT_SCREEN);
+    return;
+  }
   else
   {
     return;
@@ -81,7 +87,7 @@ void updateGame()
       current_level++;
       if (current_level == level_count)
       {
-        CURRENT_SCREEN = MENU_SCREEN;
+        gotoScreen(MENU_SCREEN);
       }
       else
       {
@@ -361,6 +367,8 @@ bool isWord(uint8_t tile)
 
 void startLevel(uint8_t id)
 {
+  gotoScreen(GAME_SCREEN);
+
   current_level = id;
   initLevel(id);
 
@@ -371,6 +379,10 @@ void startLevel(uint8_t id)
 void gameTick()
 {
   updateGame();
+  if (CURRENT_SCREEN != GAME_SCREEN)
+  {
+    return;
+  }
 
   for (uint8_t sliceIndex = 0; sliceIndex < slices; sliceIndex++)
   {

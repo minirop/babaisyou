@@ -34,7 +34,12 @@
 #define SCREEN_WIDTH 160
 #define TILE_SIZE 12
 
+#define ROW_SIZE (16*160*2)
+#define ROWS_COUNT (128/16)
+
 extern uint8_t CURRENT_SCREEN;
 #define MENU_SCREEN 0
 #define GAME_SCREEN 1
-#define VICTORY_SCREEN 2
+#define LEVEL_SELECT_SCREEN 2
+
+void gotoScreen(uint8_t screen);
