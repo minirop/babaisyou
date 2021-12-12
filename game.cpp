@@ -4,10 +4,6 @@
 #include "draw.h"
 #include "title.h"
 
-constexpr uint8_t slices = 10;
-constexpr uint8_t map_width = 13;
-constexpr uint8_t MAP_FULL_SIZE = map_width * slices;
-
 #include "levels.h"
 
 uint8_t underlevel[MAP_FULL_SIZE];
@@ -33,6 +29,7 @@ bool isYou(uint8_t tile);
 bool isWin(uint8_t tile);
 bool isSink(uint8_t tile);
 bool isKill(uint8_t tile);
+bool isSwap(uint8_t tile);
 bool isWord(uint8_t tile);
 void moveImpl(uint8_t i, int8_t delta, uint8_t min, uint8_t max);
 void convertTile(uint8_t from, uint8_t to);
@@ -129,6 +126,9 @@ void initRules()
   rules[W_LAVA] = IS_PUSH;
   rules[LAVA]   = 0;
   rules[W_KILL] = IS_PUSH;
+  rules[W_LOVE] = IS_PUSH;
+  rules[LOVE]   = 0;
+  rules[W_SWAP] = 0;
 
   for (uint8_t i = 0; i < MAP_FULL_SIZE; i++)
   {
@@ -144,15 +144,16 @@ void updateRules()
   rules[WALL] = 0;
   rules[GOOP] = 0;
   rules[LAVA] = 0;
+  rules[LOVE] = 0;
 
   for (int i = 0; i < MAP_FULL_SIZE; i++)
   {
     if (level[i] == W_IS)
     {
-      uint8_t x = i % map_width;
-      uint8_t y = i / map_width;
+      uint8_t x = i % MAP_WIDTH;
+      uint8_t y = i / MAP_WIDTH;
 
-      if (x > 0 && x < map_width - 1)
+      if (x > 0 && x < MAP_WIDTH - 1)
       {
         uint8_t subject = level[i - 1];
         uint8_t status = level[i + 1];
@@ -169,10 +170,10 @@ void updateRules()
         }
       }
 
-      if (y > 0 && y < slices - 1)
+      if (y > 0 && y < GAME_SLICES - 1)
       {
-        uint8_t subject = level[i - map_width];
-        uint8_t status = level[i + map_width];
+        uint8_t subject = level[i - MAP_WIDTH];
+        uint8_t status = level[i + MAP_WIDTH];
         if (isSubject(subject))
         {
           if (isStatus(status))
@@ -199,6 +200,7 @@ bool isSubject(uint8_t tile)
     case W_WALL:
     case W_GOOP:
     case W_LAVA:
+    case W_LOVE:
       return true;
   }
   return false;
@@ -214,6 +216,7 @@ bool isStatus(uint8_t tile)
     case W_YOU:
     case W_SINK:
     case W_KILL:
+    case W_SWAP:
       return true;
   }
   return false;
@@ -229,6 +232,7 @@ uint8_t getStatus(uint8_t tile)
     case W_YOU:  return IS_YOU;
     case W_SINK: return IS_SINK;
     case W_KILL: return IS_KILL;
+    case W_SWAP: return IS_SWAP;
   }
 
   return 0;
@@ -244,6 +248,7 @@ uint8_t getSubject(uint8_t tile)
     case W_FLAG: return FLAG;
     case W_GOOP: return GOOP;
     case W_LAVA: return LAVA;
+    case W_LOVE: return LOVE;
   }
 
   return 0;
@@ -251,22 +256,22 @@ uint8_t getSubject(uint8_t tile)
 
 void moveDown()
 {
-  for (int8_t i = map_width * (slices - 1); i >= 0; i--)
+  for (int8_t i = MAP_WIDTH * (GAME_SLICES - 1); i >= 0; i--)
   {
     if (isYou(level[i]))
     {
-      moveImpl(i, map_width, 0, MAP_FULL_SIZE);
+      moveImpl(i, MAP_WIDTH, 0, MAP_FULL_SIZE);
     }
   }
 }
 
 void moveUp()
 {
-  for (uint8_t i = map_width; i < MAP_FULL_SIZE; i++)
+  for (uint8_t i = MAP_WIDTH; i < MAP_FULL_SIZE; i++)
   {
     if (isYou(level[i]))
     {
-      moveImpl(i, -map_width, 0, MAP_FULL_SIZE);
+      moveImpl(i, -MAP_WIDTH, 0, MAP_FULL_SIZE);
     }
   }
 }
@@ -275,10 +280,10 @@ void moveLeft()
 {
   for (uint8_t i = 0; i < MAP_FULL_SIZE; i++)
   {
-    if (isYou(level[i]) && (i % map_width) > 0)
+    if (isYou(level[i]) && (i % MAP_WIDTH) > 0)
     {
-      uint8_t row_start = (i / map_width) * map_width;
-      moveImpl(i, -1, row_start, row_start + map_width);
+      uint8_t row_start = (i / MAP_WIDTH) * MAP_WIDTH;
+      moveImpl(i, -1, row_start, row_start + MAP_WIDTH);
     }
   }
 }
@@ -288,10 +293,10 @@ void moveRight()
   for (uint8_t k = 0; k < MAP_FULL_SIZE; k++)
   {
     uint8_t i = MAP_FULL_SIZE - k - 1;
-    if (isYou(level[i]) && (i % map_width) < map_width - 1)
+    if (isYou(level[i]) && (i % MAP_WIDTH) < MAP_WIDTH - 1)
     {
-      uint8_t row_start = (i / map_width) * map_width;
-      moveImpl(i, 1, row_start, row_start + map_width);
+      uint8_t row_start = (i / MAP_WIDTH) * MAP_WIDTH;
+      moveImpl(i, 1, row_start, row_start + MAP_WIDTH);
     }
   }
 }
@@ -303,6 +308,13 @@ void moveImpl(uint8_t i, int8_t delta, uint8_t min, uint8_t max)
   {
     if (isStop(level[yy]))
     {
+      break;
+    }
+    else if (isSwap(level[yy]))
+    {
+      uint8_t saved = level[yy];
+      level[yy] = level[yy - delta];
+      level[yy - delta] = saved;
       break;
     }
 
@@ -358,6 +370,11 @@ bool isKill(uint8_t tile)
   return (rules[tile] & IS_KILL);
 }
 
+bool isSwap(uint8_t tile)
+{
+  return (rules[tile] & IS_SWAP);
+}
+
 bool isWord(uint8_t tile)
 {
   return isSubject(tile) || isStatus(tile) || tile == W_IS;
@@ -384,13 +401,13 @@ void gameTick()
     return;
   }
 
-  for (uint8_t sliceIndex = 0; sliceIndex < slices; sliceIndex++)
+  for (uint8_t sliceIndex = 0; sliceIndex < GAME_SLICES; sliceIndex++)
   {
     uint16_t * buffer = sliceIndex % 2 == 0 ? buffer1 : buffer2;
     
-    for (int16_t s = 0; s < map_width;s++)
+    for (int16_t s = 0; s < MAP_WIDTH;s++)
     {
-      const uint16_t * sprBegin = &tileset[ level[sliceIndex * map_width + s] * TILE_SIZE * TILE_SIZE ];
+      const uint16_t * sprBegin = &tileset[ level[sliceIndex * MAP_WIDTH + s] * TILE_SIZE * TILE_SIZE ];
       for (int y = 0; y < TILE_SIZE; y++)
       {
         memcpy(&buffer[SCREEN_WIDTH * y + s * TILE_SIZE + 2], sprBegin + y * TILE_SIZE, TILE_SIZE*2);
@@ -402,7 +419,7 @@ void gameTick()
     drawScreenSlice(sliceIndex * SLICE_HEIGHT, SLICE_HEIGHT, buffer);
   }
 
-  uint16_t * buffer_black = slices % 2 == 0 ? buffer1 : buffer2;
+  uint16_t * buffer_black = GAME_SLICES % 2 == 0 ? buffer1 : buffer2;
   memset(buffer_black, 0x00, SCREEN_WIDTH * 16);
   waitForPreviousDraw();
 

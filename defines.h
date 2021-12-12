@@ -22,7 +22,10 @@
 #define W_LAVA 17
 #define LAVA   18
 #define W_KILL 19
-#define TILE_COUNT 20
+#define W_LOVE 20
+#define LOVE   21
+#define W_SWAP 22
+#define TILE_COUNT 23
 
 #define IS_YOU 1
 #define IS_WIN 2
@@ -30,6 +33,7 @@
 #define IS_PUSH 8
 #define IS_SINK 16
 #define IS_KILL 32
+#define IS_SWAP 64
 
 #define SCREEN_WIDTH 160
 #define TILE_SIZE 12
@@ -41,5 +45,9 @@ extern uint8_t CURRENT_SCREEN;
 #define MENU_SCREEN 0
 #define GAME_SCREEN 1
 #define LEVEL_SELECT_SCREEN 2
+
+#define GAME_SLICES 10
+#define MAP_WIDTH 13
+#define MAP_FULL_SIZE (MAP_WIDTH * GAME_SLICES)
 
 void gotoScreen(uint8_t screen);
