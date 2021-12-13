@@ -25,7 +25,8 @@
 #define W_LOVE 20
 #define LOVE   21
 #define W_SWAP 22
-#define TILE_COUNT 23
+#define W_EMPTY 23
+#define TILE_COUNT 24
 
 #define IS_YOU 1
 #define IS_WIN 2

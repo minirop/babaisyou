@@ -32,6 +32,11 @@ const char * names[] = {
   "LEVEL 7",
   "LEVEL 8",
   "LEVEL 9",
+  "LEVEL 10",
+  "LEVEL 11",
+  "LEVEL 12",
+  "LEVEL 13",
+  "LEVEL 14",
 };
 void levelSelectTick()
 {
@@ -68,7 +73,14 @@ void levelSelectTick()
   {
     if (selected_level < 2)
     {
-      selected_level = level_count - selected_level - 1;
+      if ((level_count % 2) == 0)
+      {
+        selected_level = level_count + selected_level - 2;
+      }
+      else
+      {
+        selected_level = level_count - selected_level - 1;
+      }
     }
     else
     {

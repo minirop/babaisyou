@@ -31,6 +31,7 @@ $tiles = [
 	'E' => 'W_LOVE',
 	'H' => 'LOVE',
 	'M' => 'W_SWAP',
+	'C' => 'W_EMPTY',
 ];
 
 foreach ($argv as $filename)

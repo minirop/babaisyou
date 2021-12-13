@@ -8,7 +8,7 @@
 
 uint8_t underlevel[MAP_FULL_SIZE];
 
-uint8_t level[MAP_FULL_SIZE] = {};
+uint8_t level[MAP_FULL_SIZE];
 uint8_t current_level = 0;
 
 uint8_t rules[TILE_COUNT];
@@ -129,6 +129,7 @@ void initRules()
   rules[W_LOVE] = IS_PUSH;
   rules[LOVE]   = 0;
   rules[W_SWAP] = 0;
+  rules[W_EMPTY]= IS_PUSH;
 
   for (uint8_t i = 0; i < MAP_FULL_SIZE; i++)
   {
@@ -201,6 +202,7 @@ bool isSubject(uint8_t tile)
     case W_GOOP:
     case W_LAVA:
     case W_LOVE:
+    case W_EMPTY:
       return true;
   }
   return false;
@@ -249,6 +251,7 @@ uint8_t getSubject(uint8_t tile)
     case W_GOOP: return GOOP;
     case W_LAVA: return LAVA;
     case W_LOVE: return LOVE;
+    case W_EMPTY:return EMPTY;
   }
 
   return 0;

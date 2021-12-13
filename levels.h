@@ -4,4 +4,4 @@
 
 extern const uint8_t * levels[];
 
-#define level_count 9
+#define level_count 12
