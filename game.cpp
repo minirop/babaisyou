@@ -10,6 +10,8 @@ uint8_t underlevel[MAP_FULL_SIZE];
 
 uint8_t level[MAP_FULL_SIZE];
 uint8_t current_level = 0;
+bool finished = false;
+bool has_player = true;
 
 uint8_t rules[TILE_COUNT];
 void updateRules();
@@ -17,6 +19,7 @@ bool isSubject(uint8_t tile);
 bool isStatus(uint8_t tile);
 uint8_t getStatus(uint8_t tile);
 void updateGame();
+void victory();
 
 void moveDown();
 void moveUp();
@@ -44,6 +47,18 @@ void initLevel(uint8_t id)
 
 void updateGame()
 {
+  if (!has_player)
+  {
+    if ((gb.frameCount >> 2) % 2)
+    {
+      gb.lights.fill(RED);
+    }
+    else
+    {
+      gb.lights.clear();
+    }
+  }
+
   if (gb.buttons.pressed(BUTTON_DOWN))
   {
     moveDown();
@@ -82,16 +97,9 @@ void updateGame()
     if (isYou(level[i]) && isWin(underlevel[i]))
     {
       current_level++;
-      if (current_level == level_count)
-      {
-        gotoScreen(MENU_SCREEN);
-      }
-      else
-      {
-        startLevel(current_level);
-      }
+      finished = true;
     }
-    else if (isSink(underlevel[i]) && !isWord(level[i]))
+    else if (isSink(underlevel[i]))
     {
       level[i] = EMPTY;
       underlevel[i] = EMPTY;
@@ -102,6 +110,32 @@ void updateGame()
       underlevel[i] = EMPTY;
     }
   }
+}
+
+void victory()
+{
+  memset(buffer1, 0x00, ROW_SIZE);
+  drawText(60, 4, "VICTORY", buffer1);
+  drawScreenSlice(56, 16, buffer1);
+  waitForPreviousDraw();
+
+  for (int i = 0; i < 10; i++)
+  {
+    gb.lights.fill(YELLOW);
+    delay(100);
+    gb.lights.clear();
+    delay(100);
+  }
+
+  if (current_level == level_count)
+  {
+    gotoScreen(MENU_SCREEN);
+  }
+  else
+  {
+    startLevel(current_level);
+  }
+  finished = false;
 }
 
 void initRules()
@@ -388,6 +422,8 @@ bool isWord(uint8_t tile)
 void startLevel(uint8_t id)
 {
   gotoScreen(GAME_SCREEN);
+  gb.lights.clear();
+  has_player = true;
 
   current_level = id;
   initLevel(id);
@@ -400,6 +436,11 @@ void gameTick()
 {
   updateGame();
   if (CURRENT_SCREEN != GAME_SCREEN)
+  {
+    return;
+  }
+
+  if (!has_player)
   {
     return;
   }
@@ -428,6 +469,30 @@ void gameTick()
 
   drawScreenSlice(120, 8, buffer_black);
   waitForPreviousDraw();
+
+  if (finished)
+  {
+    victory();
+  }
+  else if (has_player)
+  {
+    has_player = false;
+    for (int8_t i = MAP_WIDTH * (GAME_SLICES - 1); i >= 0; i--)
+    {
+      if (isYou(level[i]))
+      {
+        has_player = true;
+        break;
+      }
+    }
+  }
+  if (!has_player)
+  {
+    memset(buffer1, 0x00, ROW_SIZE);
+    drawText(32, 4, "B: RESTART LEVEL", buffer1);
+    drawScreenSlice(56, 16, buffer1);
+    waitForPreviousDraw();
+  }
 }
 
 void convertTile(uint8_t from, uint8_t to)
