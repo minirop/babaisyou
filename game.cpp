@@ -94,7 +94,7 @@ void updateGame()
 
   for (int i = 0; i < MAP_FULL_SIZE; i++)
   {
-    if (isYou(level[i]) && isWin(underlevel[i]))
+    if (isYou(level[i]) && (isWin(underlevel[i]) || isWin(level[i])))
     {
       current_level++;
       finished = true;
@@ -477,7 +477,7 @@ void gameTick()
   else if (has_player)
   {
     has_player = false;
-    for (int8_t i = MAP_WIDTH * (GAME_SLICES - 1); i >= 0; i--)
+    for (uint8_t i = 0; i < MAP_FULL_SIZE; i++)
     {
       if (isYou(level[i]))
       {
