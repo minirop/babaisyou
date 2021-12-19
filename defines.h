@@ -2,31 +2,33 @@
 
 #include <Gamebuino-Meta.h>
 
-#define EMPTY  0
-#define W_BABA 1
-#define W_FLAG 2
-#define W_ROCK 3
-#define W_IS   4
-#define W_WIN  5
-#define W_PUSH 6
-#define W_WALL 7
-#define BABA   8
-#define FLAG   9
-#define ROCK   10
-#define WALL   11
-#define W_STOP 12
-#define W_YOU  13
-#define W_GOOP 14
-#define GOOP   15
-#define W_SINK 16
-#define W_LAVA 17
-#define LAVA   18
-#define W_KILL 19
-#define W_LOVE 20
-#define LOVE   21
-#define W_SWAP 22
-#define W_EMPTY 23
-#define TILE_COUNT 24
+enum {
+  EMPTY,
+  W_BABA,
+  W_FLAG,
+  W_ROCK,
+  W_IS,
+  W_WIN,
+  W_PUSH,
+  W_WALL,
+  BABA,
+  FLAG,
+  ROCK,
+  WALL,
+  W_STOP,
+  W_YOU,
+  W_GOOP,
+  GOOP,
+  W_SINK,
+  W_LAVA,
+  LAVA,
+  W_KILL,
+  W_LOVE,
+  LOVE,
+  W_SWAP,
+  W_EMPTY,
+  TILE_COUNT
+};
 
 #define IS_YOU 1
 #define IS_WIN 2
@@ -46,6 +48,7 @@ extern uint8_t CURRENT_SCREEN;
 #define MENU_SCREEN 0
 #define GAME_SCREEN 1
 #define LEVEL_SELECT_SCREEN 2
+#define EDITOR_SCREEN 3
 
 #define GAME_SLICES 10
 #define MAP_WIDTH 13

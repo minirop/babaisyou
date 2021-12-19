@@ -43,7 +43,7 @@ const char * names[] = {
   "LEVEL 19",
   "LEVEL 20",
   "LEVEL 21",
-  "LEVEL 22",
+  "LEVEL SD",
   "LEVEL 23",
   "LEVEL 24",
   "LEVEL 25",
@@ -64,13 +64,13 @@ uint8_t current_page = 0;
 uint8_t start_level = 0;
 uint8_t levels_per_page = 14;
 uint8_t levels_on_page = 0;
-const uint8_t last_page = (level_count / levels_per_page);
+const uint8_t last_page = (level_count_sd / levels_per_page);
 
 void set_page(uint8_t page)
 {
   current_page = page;
   start_level = levels_per_page * page;
-  levels_on_page = min(level_count - start_level, levels_per_page);
+  levels_on_page = min(level_count_sd - start_level, levels_per_page);
 
   memset(buffer1, 0x00, ROW_SIZE);
   drawText(30, 4, "B: BACK TO TITLE", buffer1);

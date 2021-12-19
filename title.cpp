@@ -183,6 +183,11 @@ void menuTick()
     gotoScreen(LEVEL_SELECT_SCREEN);
     return;
   }
+  else if (gb.buttons.pressed(BUTTON_MENU))
+  {
+    gotoScreen(EDITOR_SCREEN);
+    return;
+  }
 
   memset(buffer1, 0x00, ROW_SIZE);
   memset(buffer2, 0x00, ROW_SIZE);

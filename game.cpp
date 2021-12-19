@@ -7,6 +7,7 @@
 #include "levels.h"
 
 uint8_t underlevel[MAP_FULL_SIZE];
+extern uint8_t editorlevel[];
 
 uint8_t level[MAP_FULL_SIZE];
 uint8_t current_level = 0;
@@ -39,9 +40,19 @@ void convertTile(uint8_t from, uint8_t to);
 
 void initLevel(uint8_t id)
 {
-  for (uint8_t i = 0; i < MAP_FULL_SIZE; i++)
+  if (id == level_count)
   {
-    level[i] = levels[id][i];
+    for (uint8_t i = 0; i < MAP_FULL_SIZE; i++)
+    {
+      level[i] = editorlevel[i];
+    }
+  }
+  else
+  {
+    for (uint8_t i = 0; i < MAP_FULL_SIZE; i++)
+    {
+      level[i] = levels[id][i];
+    }
   }
 }
 
@@ -130,6 +141,10 @@ void victory()
   if (current_level == level_count)
   {
     gotoScreen(MENU_SCREEN);
+  }
+  else if (current_level == level_count_sd)
+  {
+    gotoScreen(EDITOR_SCREEN);
   }
   else
   {

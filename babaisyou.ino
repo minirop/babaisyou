@@ -3,6 +3,7 @@
 #include "title.h"
 #include "levelselect.h"
 #include "defines.h"
+#include "editor.h"
 
 uint8_t CURRENT_SCREEN = MENU_SCREEN;
 
@@ -31,6 +32,10 @@ void loop()
   {
     levelSelectTick();
   }
+  else if (CURRENT_SCREEN == EDITOR_SCREEN)
+  {
+    editorTick();
+  }
 }
 
 void gotoScreen(uint8_t screen)
@@ -42,6 +47,9 @@ void gotoScreen(uint8_t screen)
       break;
     case LEVEL_SELECT_SCREEN:
       levelSelectInit();
+      break;
+    case EDITOR_SCREEN:
+      editorInit();
       break;
   }
 
